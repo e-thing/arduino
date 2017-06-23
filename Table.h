@@ -2,41 +2,59 @@
 #define _ETHING_TABLE_H_
 
 
-/*!
- * \file Table.h
- * \brief Table's functions
- * \author Adrien Mezerette
- * \version 0.1
- */
 
+#include "Request.h"
+#include "Object.h"
 #include "Id.h"
 
+class EThing;
 
+class Table
+{
+	
+public:
+	
+	struct PointF {
+		unsigned long timestamp;
+		float value;
+	};
 
-namespace EThing {
+	struct PointI {
+		unsigned long timestamp;
+		long value;
+	};
 	
-	/*! \namespace Table
-     *
-     *  This namespace handles Table resource
-     */
-	namespace Table {
-		
-		/*!
-         *  Create a new Table resource.
-         *
-         *  \param name the name of the table to create
-		 *  \param expireAfter the amount of time (in seconds) after which a records will be automatically removed. Set it to 0 to disable this feature.
-		 *  \param maxLength the maximum of records allowed in this table. When this number is reached, the oldest records will be removed to insert the new ones (first in, first out). Set it to 0 to disable this feature.
-		 *  \param statusCode an integer pointer receiving the HTTP request status code.
-		 *  \return the id of the created file. This id is invalid if an error occurs.
-         */
-		Id create(const char * name, unsigned long expireAfter = 0, unsigned long maxLength = 0, int * statusCode = 0);
-		
+	Table(EThing* ething, const char * tablename);
+	Table(EThing* ething, const Id& id);
 	
+	bool push(const Object& data);
+	bool push(const char * key, const char * buffer, uint8_t length);
+	bool push(const char * key, const char * value);
+	bool push(const char * key, float value);
+	bool push(const char * key, bool value);
+	bool push(const char * key, long value);
+	inline bool push(const char * key, int value){
+		return push(key, (long)value);
 	}
 	
+	typedef void (*KeyValueHandler)(int, char*, char*, Object::type_t, void*); // key, value, isValueString, context
+	int fetch(KeyValueHandler handler, int length, const char * keys = NULL, int start = 0, const char* sort = NULL, const char* query = NULL, void * context = NULL);
+	int fetch(Object * data, int length, const char * keys = NULL, int start = 0, const char* sort = NULL, const char* query = NULL);
+	int fetch(bool * data, int length, const char * key, int start = 0, const char* sort = NULL, const char* query = NULL);
+	int fetch(long * data, int length, const char * key, int start = 0, const char* sort = NULL, const char* query = NULL);
+	int fetch(float * data, int length, const char * key, int start = 0, const char* sort = NULL, const char* query = NULL);
+	int fetch(char ** data, int length, const char * key, int start = 0, const char* sort = NULL, const char* query = NULL);
+	int fetch(PointI * data, int length, const char * key, int start = 0, const char* sort = NULL, const char* query = NULL);
+	int fetch(PointF * data, int length, const char * key, int start = 0, const char* sort = NULL, const char* query = NULL);
 	
-}
+	
+private:
+	
+	const char * tablename_;
+	EThing* ething_;
+	bool id_;
+
+};
 
 
 

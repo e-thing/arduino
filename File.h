@@ -2,40 +2,56 @@
 #define _ETHING_FILE_H_
 
 
-/*!
- * \file File.h
- * \brief File's functions
- * \author Adrien Mezerette
- * \version 0.1
- */
 
+#include "Request.h"
+#include "Stream.h"
 #include "Id.h"
 
+class EThing;
 
-
-namespace EThing {
+class File: public Stream
+{
 	
-	/*! \namespace File
-     *
-     *  This namespace handles File resource
-     */
-	namespace File {
-		
-		/*!
-         *  Create a new File resource.
-         *
-         *  \param name the name of the file to create
-		 *  \param expireAfter the amount of time (in seconds) after which this resource will be removed
-		 *  \param statusCode an integer pointer receiving the HTTP request status code
-		 *  \return the id of the created file. This id is invalid if an error occurs.
-         */
-		Id create(const char * name, unsigned long expireAfter = 0, int * statusCode = 0);
-		
+public:
 	
+	enum access_t { NONE=0, READ = 0x001, WRITE = 0x010, APPEND = 0x110 };
+	
+	
+	File(EThing* ething, const char * filename);
+	File(EThing* ething, const Id& id);
+	
+	bool open(access_t access);
+	
+	
+	
+	size_t write(uint8_t character);
+	size_t write(const uint8_t *buf, size_t size);
+	
+	
+	int available();
+	int read();
+	int read(uint8_t *buf, size_t size);
+	int peek();
+	
+	
+	void flush();
+	
+	inline operator bool(){
+		return access_!=NONE && req_;
 	}
 	
 	
-}
+	bool close();
+	
+	
+private:
+	
+	const char * filename_;
+	access_t access_;
+	Request req_;
+	bool id_;
+
+};
 
 
 

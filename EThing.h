@@ -2,76 +2,70 @@
 #define _ETHING_H_
 
 
-/*!
- * \file EThing.h
- * \brief EThing Arduino SDK main file
- * \author Adrien Mezerette
- * \version 0.1
- */
- 
- 
- /*! \mainpage eThing Arduino SDK
- *
- * see <a href="../">Install EThing library</a>
- *
- */
 
-#include "config.h"
+#define ETHING_NO_BAT -1
+ 
+#include <Client.h>
+
+
+class EThing
+{
+	
+public:
+	EThing(const char * apikey, const char * hostname, Client* client, uint16_t port = 80, const char * path = "/ething/api");
+	
+private:
+	const char * apikey_;
+	const char * hostname_;
+	const char * path_;
+	Client* client_;
+	uint16_t port_;
+	int batteryLevel_;
+	
+	friend class Request;
+	
+public:
+	
+	inline void setBatteryLevel(int batteryLevel){
+		batteryLevel_ = batteryLevel;
+	}
+	
+	bool notify(const char * subject, const char * content);
+	
+	bool trigger(const char * eventName);
+	
+	/* internal data */
+	
+public:
+
+	
+	
+	bool setData(const char * key, const char * buffer, uint8_t length);
+	bool setData(const char * key, const char * value);
+	bool setData(const char * key, float value, uint8_t decimals = 2);
+	bool setData(const char * key, bool value);
+	bool setData(const char * key, long value);
+	
+	
+	char* getDataString(const char * key, char *buffer, uint8_t bufferLength);
+	bool getDataBool(const char * key);
+	long getDataInt(const char * key);
+	float getDataFloat(const char * key);
+	
+private:
+	
+	bool setData(const char * key, const char* data, uint8_t length, bool quoted);
+	bool getData(const char * key, char* buff, uint8_t buffLength);
+		
+		
+		
+};
+
+
 #include "Id.h"
-
-class Client;
-
-
-/*! \namespace EThing
- * 
- * Namespace regrouping all the EThing classes and functions
- */
- 
-namespace EThing {
-
-	
-	
-	/**
-     * \enum Type
-     *
-     * Resource's type 
-     */
-	enum Type { FILE_RESOURCE, TABLE_RESOURCE, APP_RESOURCE, DEVICE_RESOURCE };
-	
-	
-	/*!
-     *  Initialize the EThing library. Must be executed before any other EThing function calls.
-     *
-	 *  \param apiHost the hostname or IP address where the eThing server is hosted. Must not contains the protocol. (ie: 192.168.1.056)
-     *  \param apiKey the API key of the device
-	 *  \param client a client object inherited of the Client abstract class.
-     */
-	void init(const char * apiHost, const char * apiKey, Client * client);
-	
-	
-	/*!
-     *  Find the first resource that match the query given in argument.
-	 *  If not found, it returns an invalid Id object.
-	 *  Be careful, if the request failed (ie: could not reach the host ...) it also returns an invalid Id, though the resource could exist !
-	 *  That is why it is very important to check that the statusCode is equal to 200.
-     *
-	 *  \param query the query string for searching resources
-	 *  \param statusCode an integer pointer receiving the HTTP request status code.
-     */
-	Id findOne(const char * query, int * statusCode = 0);
-	
-	
-
-}
-
-#include "utils.h"
-#include "Request.h"
-#include "FileReader.h"
-#include "FileWriter.h"
-#include "TableWriter.h"
+#include "Device.h"
 #include "File.h"
 #include "Table.h"
-#include "Notification.h"
 
 
 #endif /*_ETHING_H_*/
